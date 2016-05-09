@@ -76,7 +76,7 @@ block.segments[0]
 
 
 
-## Visualizing intracelullar recordings
+## Visualizing intracellular recordings
 In order to visualize a complete single neuron recording, I overlay each recorded analogsignal on the same temporal axis.
 
 
@@ -200,11 +200,6 @@ def get_spike_features(block):
 ```python
 features = get_spike_features(block)
 ```
-
-    /home/derek/anaconda2/lib/python2.7/site-packages/efel/api.py:332: RuntimeWarning: Error while calculating feature peak_voltage:
-    Voltage never goes below or above threshold in spike detection.
-
-      RuntimeWarning)
 
 
 The features list contains dicts with the extracted features for each segment. For example, the last segment here had 3 spikes.
@@ -946,10 +941,6 @@ fits_df
 ```python
 import seaborn as sns
 ```
-
-    /home/derek/anaconda2/lib/python2.7/site-packages/matplotlib/__init__.py:872: UserWarning: axes.color_cycle is deprecated and replaced with axes.prop_cycle; please use the latter.
-      warnings.warn(self.msg_depr % (key, alt_key))
-
 
 
 ```python
