@@ -25,11 +25,11 @@ The data used was T1FF Neighbourhood Income and Demographics Tables, by Neighbou
 
 More info can be found at the following links:
 
-https://docs.google.com/document/d/1o5Q8Od25HvMXVYQqK2pjpl6k8Z1as5fxeovfi37S68w/edit?ts=5798eb82#heading=h.vyblhz62pbr3
+(https://docs.google.com/document/d/1o5Q8Od25HvMXVYQqK2pjpl6k8Z1as5fxeovfi37S68w/edit?ts=5798eb82#heading=h.vyblhz62pbr3)
 
-http://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&SDDS=4105
+(http://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&SDDS=4105)
 
-http://www23.statcan.gc.ca/imdb-bmdi/document/4105_D5_T1_V13-eng.htm
+(http://www23.statcan.gc.ca/imdb-bmdi/document/4105_D5_T1_V13-eng.htm)
 
 I chose to map out the economic dependency ratio by neighbourhood since it seemed to a tractable task for the day and could provide a good overview of earned income as compared to social benefits received.
 
@@ -637,7 +637,7 @@ plot_scheme('fisher_jenks', 'couple_fam', map_data)
 
 
 
-![png]({filename}tpl-prosperity_files/final_42_1.png)
+![png]({filename}images/tpl-prosperity_files/final_42_1.png)
 
 
 ### Choropleth of EDR for lone parent families
@@ -652,7 +652,7 @@ plot_scheme('fisher_jenks', 'lone_parent', map_data)
 
 
 
-![png]({filename}tpl-prosperity_files/final_44_1.png)
+![png]({filename}images/tpl-prosperity_files/final_44_1.png)
 
 
 ### Using a different classification scheme
@@ -665,7 +665,7 @@ plot_scheme('quantiles', 'lone_parent', map_data)
 
 
 
-![png]({filename}tpl-prosperity_files/final_46_1.png)
+![png]({filename}images/tpl-prosperity_files/final_46_1.png)
 
 
 
@@ -676,12 +676,12 @@ plot_scheme('fisher_jenks', 'all_persons', map_data)
 
 
 
-![png]({filename}tpl-prosperity_files/final_47_1.png)
+![png]({filename}images/tpl-prosperity_files/final_47_1.png)
 
 
 ### Making interactive maps with bokeh
 
-- I've seen some good examples of using bokeh for interactive plotting and figured I could try my hand at making an explorable choropleth where the EDR is displayed when hovering over a specific neighbourhood. The following was largely followed from http://darribas.org/gds_scipy16/ipynb_md/02_geovisualization.html
+- I've seen some good examples of using bokeh for interactive plotting and figured I could try my hand at making an explorable choropleth where the EDR is displayed when hovering over a specific neighbourhood. The following was largely followed from (http://darribas.org/gds_scipy16/ipynb_md/02_geovisualization.html)
 
 - Note: This example has classfied the neighbourhoods into 5 quantiles
 
