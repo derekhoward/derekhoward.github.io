@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en"
+>
+<head>
+    <title>TPL prosperity hackathon mapping - Derek Howard</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/posts/2016/10/tpl-prosperity-hackathon-mapping/">
+
+        <meta name="author" content="Derek Howard" />
+        <meta name="keywords" content="exploration,python,maps" />
+        <meta name="description" content="import pandas as pd import numpy as np import geopandas as gpd import matplotlib.pyplot as plt import seaborn as sns import pysal as ps %matplotlib inline Background info This notebook is the result of some exploration and analysis that took place at the Toronto Public Library TOProsperity hackathon. The ..." />
+
+        <meta property="og:site_name" content="Derek Howard" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="TPL prosperity hackathon mapping"/>
+        <meta property="og:url" content="/posts/2016/10/tpl-prosperity-hackathon-mapping/"/>
+        <meta property="og:description" content="import pandas as pd import numpy as np import geopandas as gpd import matplotlib.pyplot as plt import seaborn as sns import pysal as ps %matplotlib inline Background info This notebook is the result of some exploration and analysis that took place at the Toronto Public Library TOProsperity hackathon. The ..."/>
+        <meta property="article:published_time" content="2016-10-14" />
+            <meta property="article:section" content="misc" />
+            <meta property="article:tag" content="exploration" />
+            <meta property="article:tag" content="python" />
+            <meta property="article:tag" content="maps" />
+            <meta property="article:author" content="Derek Howard" />
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.simplex.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/native.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Derek Howard            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                         <li><a href="/pages/about.html">
+                             About
+                          </a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href="/archives.html"><i class="fa fa-th-list"></i><span class="icon-label">Archives</span></a></li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/posts/2016/10/tpl-prosperity-hackathon-mapping/"
+                       rel="bookmark"
+                       title="Permalink to TPL prosperity hackathon mapping">
+                        TPL prosperity hackathon mapping
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2016-10-14T18:00:00-04:00"> Fri 14 October 2016</time>
+    </span>
+
+
+
+<span class="label label-default">Tags</span>
+	<a href="/tag/exploration/">exploration</a>
+        /
+	<a href="/tag/python/">python</a>
+        /
+	<a href="/tag/maps/">maps</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="kn">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">pysal</span> <span class="kn">as</span> <span class="nn">ps</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+
+
+<h1>Background info</h1>
+<p>This notebook is the result of some exploration and analysis that took place at the Toronto Public Library <a href="http://www.torontopubliclibrary.ca/hackathon/">TOProsperity hackathon</a>.</p>
+<p>The challenge for the day was:
+How can we use information from annual tax records to better understand patterns of income across neighbourhoods in Toronto?</p>
+<p>The data used was T1FF Neighbourhood Income and Demographics Tables, by Neighbourhood.</p>
+<p>More info can be found at the following links:</p>
+<p><a href="https://docs.google.com/document/d/1o5Q8Od25HvMXVYQqK2pjpl6k8Z1as5fxeovfi37S68w/edit?ts=5798eb82#heading=h.vyblhz62pbr3">TPL challenges</a></p>
+<p><a href="http://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&amp;SDDS=4105">T1 family file info</a></p>
+<p>I chose to map out the economic dependency ratio by neighbourhood since it seemed to a tractable task for the day and could provide a good overview of earned income as compared to social benefits received.</p>
+<ul>
+<li>Economic Dependency Ratio (EDR):</li>
+</ul>
+<p>Is the sum of transfer payment dollars received as benefits in a given area, compared to every \$100 of employment income for that same area. For example, where a table shows an Employment Insurance (EI) dependency ratio of 4.69, it means that \$4.69 in EI benefits were received for every \$100 of employment income for the area.</p>
+<h2>Explore and clean the CRA data from the T1FF data</h2>
+<div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./data/T1FF-F2010-2014.csv&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">subset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">Year</span> <span class="o">==</span> <span class="s1">&#39;2012&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s1">&#39;F-7&#39;</span><span class="p">,</span><span class="s1">&#39;F-8&#39;</span><span class="p">]))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Attribute</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;EDR&#39;</span><span class="p">))]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1">#creating 2 subsets of data from CRA, those for Couple families (table F7) and those from lone parent families (table F8)</span>
+<span class="n">CF_subset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">Year</span> <span class="o">==</span> <span class="s1">&#39;2014&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s1">&#39;F-7&#39;</span><span class="p">]))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Attribute</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;· Government transfers · EDR&#39;</span><span class="p">))]</span>
+<span class="n">LP_subset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">Year</span> <span class="o">==</span> <span class="s1">&#39;2014&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s1">&#39;F-8&#39;</span><span class="p">]))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Attribute</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;· Government transfers · EDR&#39;</span><span class="p">))]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">CF_subset</span><span class="o">.</span><span class="n">Attribute</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>array([&#39;Couple families · Government transfers · EDR&#39;,
+       &#39;Male Partners in Couple Families · Government transfers · EDR&#39;,
+       &#39;Female Partners in Couple Families · Government transfers · EDR&#39;,
+       &#39;Children in CFF · Government transfers · EDR&#39;,
+       &#39;All persons · Government transfers · EDR&#39;], dtype=object)
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">LP_subset</span><span class="o">.</span><span class="n">Attribute</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>array([&#39;Lone-parent families · Government transfers · EDR&#39;,
+       &#39;Parents in LPF · Government transfers · EDR&#39;,
+       &#39;Children in LPF · Government transfers · EDR&#39;,
+       &#39;Non-family persons · Government transfers · EDR&#39;,
+       &#39;All persons · Government transfers · EDR&#39;], dtype=object)
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">CF_subset</span> <span class="o">=</span> <span class="n">CF_subset</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Year&#39;</span><span class="p">,</span> <span class="s1">&#39;Table&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">LP_subset</span> <span class="o">=</span> <span class="n">LP_subset</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Year&#39;</span><span class="p">,</span> <span class="s1">&#39;Table&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">long_EDR_CF</span> <span class="o">=</span> <span class="n">CF_subset</span><span class="o">.</span><span class="n">T</span>
+<span class="n">long_EDR_LP</span> <span class="o">=</span> <span class="n">LP_subset</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">long_EDR_CF</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">long_EDR_CF</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Attribute&#39;</span><span class="p">]</span>
+<span class="n">long_EDR_LP</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">long_EDR_LP</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Attribute&#39;</span><span class="p">]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">long_EDR_CF</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Attribute&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">long_EDR_LP</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Attribute&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">long_EDR_CF</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">long_EDR_CF</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;neighbourhood&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">long_EDR_LP</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">long_EDR_LP</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;neighbourhood&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">long_EDR_CF</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Attribute</th>
+      <th>neighbourhood</th>
+      <th>Couple families · Government transfers · EDR</th>
+      <th>Male Partners in Couple Families · Government transfers · EDR</th>
+      <th>Female Partners in Couple Families · Government transfers · EDR</th>
+      <th>Children in CFF · Government transfers · EDR</th>
+      <th>All persons · Government transfers · EDR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Agincourt North</td>
+      <td>21.9</td>
+      <td>20.2</td>
+      <td>33</td>
+      <td>5.4</td>
+      <td>26.8</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Agincourt South-Malvern West</td>
+      <td>19.6</td>
+      <td>18.5</td>
+      <td>28.4</td>
+      <td>5.2</td>
+      <td>24.1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Alderwood</td>
+      <td>11.5</td>
+      <td>10.7</td>
+      <td>14.1</td>
+      <td>6.2</td>
+      <td>16</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="highlight"><pre><span></span><span class="n">total</span> <span class="o">=</span> <span class="n">long_EDR_CF</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">long_EDR_LP</span><span class="p">[[</span><span class="s1">&#39;neighbourhood&#39;</span><span class="p">,</span> <span class="s1">&#39;Lone-parent families · Government transfers · EDR&#39;</span><span class="p">]],</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;neighbourhood&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;neighbourhood&#39;</span><span class="p">,</span> <span class="s1">&#39;Couple families · Government transfers · EDR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Lone-parent families · Government transfers · EDR&#39;</span><span class="p">,</span> <span class="s1">&#39;All persons · Government transfers · EDR&#39;</span><span class="p">]</span>
+<span class="n">EDR_df</span> <span class="o">=</span> <span class="n">total</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">EDR_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Attribute</th>
+      <th>neighbourhood</th>
+      <th>Couple families · Government transfers · EDR</th>
+      <th>Lone-parent families · Government transfers · EDR</th>
+      <th>All persons · Government transfers · EDR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Agincourt North</td>
+      <td>21.9</td>
+      <td>35.1</td>
+      <td>26.8</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Agincourt South-Malvern West</td>
+      <td>19.6</td>
+      <td>37</td>
+      <td>24.1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="highlight"><pre><span></span><span class="n">cols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Couple families · Government transfers · EDR&#39;</span><span class="p">:</span> <span class="s1">&#39;couple_fam&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Lone-parent families · Government transfers · EDR&#39;</span><span class="p">:</span> <span class="s1">&#39;lone_parent&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;All persons · Government transfers · EDR&#39;</span><span class="p">:</span> <span class="s1">&#39;all_persons&#39;</span><span class="p">}</span>
+
+<span class="n">EDR_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">EDR_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Attribute</th>
+      <th>neighbourhood</th>
+      <th>couple_fam</th>
+      <th>lone_parent</th>
+      <th>all_persons</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Agincourt North</td>
+      <td>21.9</td>
+      <td>35.1</td>
+      <td>26.8</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Agincourt South-Malvern West</td>
+      <td>19.6</td>
+      <td>37</td>
+      <td>24.1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Alderwood</td>
+      <td>11.5</td>
+      <td>26.1</td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Annex</td>
+      <td>5.2</td>
+      <td>13.2</td>
+      <td>7.7</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Banbury-Don Mills</td>
+      <td>11.3</td>
+      <td>21.6</td>
+      <td>15.8</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Clean and merge the EDR data with Toronto neighbourhoods geometries</h2>
+<div class="highlight"><pre><span></span><span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s1">&#39;./data/neighbourhoods_shp/&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">gdf</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AREA_NAME</th>
+      <th>AREA_S_CD</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Yonge-St.Clair (97)</td>
+      <td>097</td>
+      <td>POLYGON ((-79.39119482700001 43.681081124, -79...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>York University Heights (27)</td>
+      <td>027</td>
+      <td>POLYGON ((-79.505287916 43.759873494, -79.5048...</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<ul>
+<li>To merge the spatial and EDR data, first clean the neighbourhood names so you can do a merge on that column</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">neighbourhood</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s1">&#39;AREA_NAME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">r&quot;\(.*\)&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">gdf</span><span class="p">[</span><span class="s1">&#39;neighbourhood&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">neighbourhood</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="n">gdf</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;AREA_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;AREA_S_CD&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<ul>
+<li>An inconsistency I've found is that not all neighbourhood names are the same in both the CRA data and the geometries shapefile for the city neighbourhoods. More cleaning is needed.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">EDR_neigh</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">EDR_df</span><span class="o">.</span><span class="n">neighbourhood</span><span class="p">)</span>
+<span class="n">gdf_neigh</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">neighbourhood</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;diff1: &#39;</span><span class="p">,</span> <span class="n">EDR_neigh</span> <span class="o">-</span> <span class="n">gdf_neigh</span><span class="p">)</span>
+<span class="k">print</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;diff2: &#39;</span><span class="p">,</span> <span class="n">gdf_neigh</span> <span class="o">-</span> <span class="n">EDR_neigh</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>diff1:  {&#39;North St. James Town&#39;, &#39;Mimico (includes Humber Bay Shores)&#39;, &#39;City of Toronto&#39;, &#39;Cabbagetown-South St. James Town&#39;, &#39;Weston-Pelham Park&#39;}
+
+diff2:  {&#39;Cabbagetown-South St.James Town&#39;, &#39;Weston-Pellam Park&#39;, &#39;North St.James Town&#39;, &#39;Mimico&#39;}
+</pre></div>
+
+
+<ul>
+<li>To fix this I'll use fuzzy string matching. This is a case where it's relatively easy to fix manually, but using a fuzzy string matching process is likely more robust and could scale up if more errors were present.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fuzzywuzzy</span> <span class="kn">import</span> <span class="n">process</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">correct_neighbs</span>  <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">neighbourhood</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">correct_neigh</span><span class="p">(</span><span class="n">neighbourhood</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">neighbourhood</span> <span class="ow">in</span> <span class="n">correct_neighbs</span><span class="p">:</span>  <span class="c1"># might want to make this a dict for O(1) lookups</span>
+        <span class="k">return</span> <span class="n">neighbourhood</span><span class="p">,</span> <span class="mi">100</span>
+
+    <span class="n">new_name</span><span class="p">,</span> <span class="n">score</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">extractOne</span><span class="p">(</span><span class="n">neighbourhood</span><span class="p">,</span> <span class="n">correct_neighbs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">score</span> <span class="o">&lt;</span> <span class="mi">90</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">neighbourhood</span><span class="p">,</span> <span class="n">score</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">new_name</span><span class="p">,</span> <span class="n">score</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">corrected_neigh</span><span class="p">,</span> <span class="n">dfscore</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">EDR_df</span><span class="p">[</span><span class="s1">&#39;neighbourhood&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">correct_neigh</span><span class="p">))</span>
+<span class="n">EDR_df</span><span class="p">[</span><span class="s1">&#39;corrected_hood&#39;</span><span class="p">],</span> <span class="n">EDR_df</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">EDR_df</span><span class="p">[</span><span class="s1">&#39;neighbourhood&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">correct_neigh</span><span class="p">))</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">EDR_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;neighbourhood&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">EDR_df</span> <span class="o">=</span> <span class="n">EDR_df</span><span class="p">[</span><span class="n">EDR_df</span><span class="o">.</span><span class="n">score</span> <span class="o">&gt;=</span> <span class="mi">90</span><span class="p">]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">EDR_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Attribute</th>
+      <th>couple_fam</th>
+      <th>lone_parent</th>
+      <th>all_persons</th>
+      <th>corrected_hood</th>
+      <th>score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>21.9</td>
+      <td>35.1</td>
+      <td>26.8</td>
+      <td>Agincourt North</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>19.6</td>
+      <td>37</td>
+      <td>24.1</td>
+      <td>Agincourt South-Malvern West</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>11.5</td>
+      <td>26.1</td>
+      <td>16</td>
+      <td>Alderwood</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5.2</td>
+      <td>13.2</td>
+      <td>7.7</td>
+      <td>Annex</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>11.3</td>
+      <td>21.6</td>
+      <td>15.8</td>
+      <td>Banbury-Don Mills</td>
+      <td>100</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<ul>
+<li>After cleaning, merge the data on the cleaned up neighbourhood columns, then drop what is redundant:</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">map_data</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">EDR_df</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s1">&#39;neighbourhood&#39;</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="s1">&#39;corrected_hood&#39;</span><span class="p">)</span>
+<span class="n">map_data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;corrected_hood&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">map_data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>geometry</th>
+      <th>neighbourhood</th>
+      <th>couple_fam</th>
+      <th>lone_parent</th>
+      <th>all_persons</th>
+      <th>score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>POLYGON ((-79.39119482700001 43.681081124, -79...</td>
+      <td>Yonge-St.Clair</td>
+      <td>5.5</td>
+      <td>8.4</td>
+      <td>7.4</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>POLYGON ((-79.505287916 43.759873494, -79.5048...</td>
+      <td>York University Heights</td>
+      <td>21.1</td>
+      <td>47</td>
+      <td>26.7</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>POLYGON ((-79.439984311 43.761557655, -79.4400...</td>
+      <td>Lansing-Westgate</td>
+      <td>6.1</td>
+      <td>19.5</td>
+      <td>7.7</td>
+      <td>100</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="highlight"><pre><span></span><span class="n">map_data</span><span class="o">.</span><span class="n">dtypes</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>geometry         object
+neighbourhood    object
+couple_fam       object
+lone_parent      object
+all_persons      object
+score             int64
+dtype: object
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1">#convert the EDR scores from objects to numeric type so they can be processed properly for mapping</span>
+<span class="n">map_data</span><span class="p">[[</span><span class="s1">&#39;couple_fam&#39;</span><span class="p">,</span> <span class="s1">&#39;lone_parent&#39;</span><span class="p">,</span> <span class="s1">&#39;all_persons&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">map_data</span><span class="p">[[</span><span class="s1">&#39;couple_fam&#39;</span><span class="p">,</span> <span class="s1">&#39;lone_parent&#39;</span><span class="p">,</span> <span class="s1">&#39;all_persons&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">)</span>
+</pre></div>
+
+
+<h2>Plotting choropleths</h2>
+<ul>
+<li>Choropleths encode the spatial distribution of a variable in a color scheme. There are a number of ways to convert values to a specific color.</li>
+<li>It's important to note that different classification schemes of the same data can produce very different maps due to distribution of values and the simplifications inherent in building a choropleth.</li>
+<li>I plotted static choropleth maps alongside the density plots of the variable in question to get a better understanding of how classification schemes can affect the final visual.</li>
+<li>Lastly, I tested out bokeh to get an interactive map where hovering over a neighbourhood would highlight the specific EDR in that neighbourhood.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_scheme</span><span class="p">(</span><span class="n">scheme</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">saveto</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Plot the distribution over value and geographical space of variable `var` using scheme `scheme</span>
+<span class="sd">    ...</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    scheme   : str</span>
+<span class="sd">               Name of the classification scheme to use</span>
+<span class="sd">    var      : str</span>
+<span class="sd">               Variable name</span>
+<span class="sd">    df       : GeoDataFrame</span>
+<span class="sd">               Table with input data</span>
+<span class="sd">    figsize  : Tuple</span>
+<span class="sd">               [Optional. Default = (16, 8)] Size of the figure to be created.</span>
+<span class="sd">    saveto   : None/str</span>
+<span class="sd">               [Optional. Default = None] Path for file to save the plot.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">pysal.esda.mapclassify</span> <span class="kn">import</span> <span class="n">Quantiles</span><span class="p">,</span> <span class="n">Equal_Interval</span><span class="p">,</span> <span class="n">Fisher_Jenks</span>
+
+    <span class="n">schemes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;equal_interval&#39;</span><span class="p">:</span> <span class="n">Equal_Interval</span><span class="p">,</span> \
+               <span class="s1">&#39;quantiles&#39;</span><span class="p">:</span> <span class="n">Quantiles</span><span class="p">,</span> \
+               <span class="s1">&#39;fisher_jenks&#39;</span><span class="p">:</span> <span class="n">Fisher_Jenks</span><span class="p">}</span>
+    <span class="n">classi</span> <span class="o">=</span> <span class="n">schemes</span><span class="p">[</span><span class="n">scheme</span><span class="p">](</span><span class="n">df</span><span class="p">[</span><span class="n">var</span><span class="p">],</span> <span class="n">k</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="c1"># KDE</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">var</span><span class="p">],</span> <span class="n">shade</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">rugplot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">var</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">cut</span> <span class="ow">in</span> <span class="n">classi</span><span class="o">.</span><span class="n">bins</span><span class="p">:</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Value distribution&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Map</span>
+    <span class="c1">#p = df.plot(column=var, scheme=scheme, alpha=0.75, k=7, cmap=plt.cm.Blues_r, axes=ax2, linewidth=0.1)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">var</span><span class="p">,</span> <span class="n">scheme</span><span class="o">=</span><span class="n">scheme</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Geographical distribution&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">scheme</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">saveto</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">saveto</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+
+<h3>Choropleth of EDR for couple families</h3>
+<ul>
+<li>lighter colours signify a higher EDR.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">plot_scheme</span><span class="p">(</span><span class="s1">&#39;fisher_jenks&#39;</span><span class="p">,</span> <span class="s1">&#39;couple_fam&#39;</span><span class="p">,</span> <span class="n">map_data</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="png" src="/images/tpl-prosperity_files/final_42_1.png" /></p>
+<h3>Choropleth of EDR for lone parent families</h3>
+<ul>
+<li>important to note the EDR scale on the x-axis of the values distribution. These values are significantly higher than those seen in the previous plot for couple families.</li>
+<li>The colour scheme is re-adjusted for each plot, so the colour intensities are not comparable between the previous plot and this one.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">plot_scheme</span><span class="p">(</span><span class="s1">&#39;fisher_jenks&#39;</span><span class="p">,</span> <span class="s1">&#39;lone_parent&#39;</span><span class="p">,</span> <span class="n">map_data</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="png" src="/images/tpl-prosperity_files/final_44_1.png" /></p>
+<h3>Using a different classification scheme</h3>
+<ul>
+<li>here the neighbourhoods are classified into quantiles of equal size, as opposed to using the <a href="https://en.wikipedia.org/wiki/Jenks_natural_breaks_optimization">fisher_jenks</a> classification scheme which attempts to minimize intra-class differences while maximizing inter-class differences.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">plot_scheme</span><span class="p">(</span><span class="s1">&#39;quantiles&#39;</span><span class="p">,</span> <span class="s1">&#39;lone_parent&#39;</span><span class="p">,</span> <span class="n">map_data</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="png" src="/images/tpl-prosperity_files/final_46_1.png" /></p>
+<div class="highlight"><pre><span></span><span class="n">plot_scheme</span><span class="p">(</span><span class="s1">&#39;fisher_jenks&#39;</span><span class="p">,</span> <span class="s1">&#39;all_persons&#39;</span><span class="p">,</span> <span class="n">map_data</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="png" src="/images/tpl-prosperity_files/final_47_1.png" /></p>
+<h3>Making interactive maps with bokeh</h3>
+<ul>
+<li>
+<p>I've seen some good examples of using bokeh for interactive plotting and figured I could try my hand at making an explorable choropleth where the EDR is displayed when hovering over a specific neighbourhood. The following was largely followed from (http://darribas.org/gds_scipy16/ipynb_md/02_geovisualization.html)</p>
+</li>
+<li>
+<p>Note: This example has classfied the neighbourhoods into 5 quantiles</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">output_notebook</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">ColumnDataSource</span>
+<span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="n">HoverTool</span>
+<span class="kn">from</span> <span class="nn">bokeh.charts</span> <span class="kn">import</span> <span class="n">Scatter</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">show</span>
+<span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="n">output_notebook</span>
+<span class="n">output_notebook</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;bk-root&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://bokeh.pydata.org&quot;</span> <span class="na">target=</span><span class="s">&quot;_blank&quot;</span> <span class="na">class=</span><span class="s">&quot;bk-logo bk-logo-small bk-logo-notebook&quot;</span><span class="nt">&gt;&lt;/a&gt;</span>
+    <span class="nt">&lt;span</span> <span class="na">id=</span><span class="s">&quot;a5eff3b3-26ea-4323-9f47-da8fb049e147&quot;</span><span class="nt">&gt;</span>Loading BokehJS ...<span class="nt">&lt;/span&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">gpd_bokeh</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert geometries from geopandas to bokeh format&quot;&quot;&quot;</span>
+    <span class="n">nan</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)</span>
+    <span class="n">lons</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lats</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">shape</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">shape</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s1">&#39;MultiPolygon&#39;</span><span class="p">:</span>
+            <span class="n">gx</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">gy</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ng</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">geoms</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">member</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">geoms</span><span class="p">):</span>
+                <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+                <span class="n">xs</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">ys</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">gx</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+                <span class="n">gy</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">ng</span><span class="p">:</span>
+                    <span class="n">gx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">gy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nan</span><span class="p">)</span>
+            <span class="n">lons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gx</span><span class="p">)</span>
+            <span class="n">lats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gy</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>     
+            <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">ys</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">lons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+            <span class="n">lats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lons</span><span class="p">,</span><span class="n">lats</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">lons</span><span class="p">,</span> <span class="n">lats</span> <span class="o">=</span> <span class="n">gpd_bokeh</span><span class="p">(</span><span class="n">map_data</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">map_data</span><span class="p">[</span><span class="s1">&#39;all_persons&#39;</span><span class="p">]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">bins_q5</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">Quantiles</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">bwr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;Reds&#39;</span><span class="p">)</span>
+<span class="n">bwr</span><span class="p">(</span><span class="o">.</span><span class="mi">76</span><span class="p">)</span>
+<span class="n">c5</span> <span class="o">=</span> <span class="p">[</span><span class="n">bwr</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]]</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="n">bins_q5</span><span class="o">.</span><span class="n">yb</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">c5</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">]</span>
+
+<span class="n">colors5</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#F1EEF6&quot;</span><span class="p">,</span> <span class="s2">&quot;#D4B9DA&quot;</span><span class="p">,</span> <span class="s2">&quot;#C994C7&quot;</span><span class="p">,</span> <span class="s2">&quot;#DF65B0&quot;</span><span class="p">,</span> <span class="s2">&quot;#DD1C77&quot;</span><span class="p">]</span>
+<span class="n">colors5</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">colors5</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">lons</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">lats</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">map_data</span><span class="o">.</span><span class="n">neighbourhood</span><span class="p">,</span>
+        <span class="n">rate</span><span class="o">=</span><span class="n">values</span>
+    <span class="p">))</span>
+
+<span class="n">TOOLS</span> <span class="o">=</span> <span class="s2">&quot;pan, wheel_zoom, box_zoom, reset, hover, save&quot;</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Toronto EDR (quintiles)&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">TOOLS</span><span class="p">,</span>
+          <span class="n">plot_width</span><span class="o">=</span><span class="mi">950</span><span class="p">,</span> <span class="n">plot_height</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">patches</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+         <span class="n">fill_color</span><span class="o">=</span><span class="s1">&#39;color&#39;</span><span class="p">,</span> <span class="n">fill_alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+         <span class="n">line_color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">hover</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="n">HoverTool</span><span class="p">)</span>
+<span class="n">hover</span><span class="o">.</span><span class="n">point_policy</span> <span class="o">=</span> <span class="s1">&#39;follow_mouse&#39;</span>
+<span class="n">hover</span><span class="o">.</span><span class="n">tooltips</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;Neighbourhood&quot;</span><span class="p">,</span> <span class="s2">&quot;@name&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;EDR&quot;</span><span class="p">,</span> <span class="s2">&quot;@rate&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+
+
+<span class="n">output_file</span><span class="p">(</span><span class="s2">&quot;EDR_to.html&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Toronto EDR example&quot;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Overall the TPL hackathon was very interesting! If I were to keep exploring this data I would want to figure out what factors lead to such a high EDR in the Bay st corridor, which is typically thought of as a neighbourhood with higher earning individuals who would not receive so many government transfer payments.</p>
+            </div>
+            <!-- /.entry-content -->
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+
+<section class="well well-sm">
+    <ul class="list-group list-group-flush">
+            <li class="list-group-item"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+              <ul class="list-group" id="social">
+                <li class="list-group-item"><a href="https://github.com/derekhoward"><i class="fa fa-github-square fa-lg"></i> Github</a></li>
+                <li class="list-group-item"><a href="https://twitter.com/derekhoward0"><i class="fa fa-twitter-square fa-lg"></i> Twitter</a></li>
+              </ul>
+            </li>
+
+
+
+            <li class="list-group-item"><a href="/"><h4><i class="fa fa-tags fa-lg"></i><span class="icon-label">Tags</span></h4></a>
+                <ul class="list-group " id="tags">
+                </ul>
+            </li>
+    </ul>
+</section>
+            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2016 Derek Howard
+            &middot; Powered by <a href="https://github.com/DandyDev/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+
+</body>
+</html>
