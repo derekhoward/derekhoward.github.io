@@ -1,4 +1,7 @@
-
+Title: TPL prosperity hackathon mapping
+Date: 2016-10-14 18:00
+Tags: exploration, python, maps
+Authors: Derek Howard
 
 ```python
 import pandas as pd
