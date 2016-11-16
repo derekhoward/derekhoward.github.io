@@ -1,20 +1,9 @@
 Title: TPL prosperity hackathon mapping
 Date: 2016-10-14 18:00
-Tags: exploration, python, maps
+Tags: python, maps
 Authors: Derek Howard
 
-```python
-import pandas as pd
-import numpy as np
-import geopandas as gpd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pysal as ps
-%matplotlib inline
-```
-
-
-# Background info
+## Background
 
 This notebook is the result of some exploration and analysis that took place at the Toronto Public Library [TOProsperity hackathon](http://www.torontopubliclibrary.ca/hackathon/).
 
@@ -34,10 +23,21 @@ I chose to map out the economic dependency ratio by neighbourhood since it seeme
 
 - Economic Dependency Ratio (EDR):
 
-Is the sum of transfer payment dollars received as benefits in a given area, compared to every \$100 of employment income for that same area. For example, where a table shows an Employment Insurance (EI) dependency ratio of 4.69, it means that \$4.69 in EI benefits were received for every \$100 of employment income for the area.
+Is the sum of transfer payment dollars received as benefits in a given area, compared to every $100 of employment income for that same area. For example, where a table shows an Employment Insurance (EI) dependency ratio of 4.69, it means that $4.69 in EI benefits were received for every $100 of employment income for the area.
+
 
 ## Explore and clean the CRA data from the T1FF data
 
+
+```python
+import pandas as pd
+import numpy as np
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pysal as ps
+%matplotlib inline
+```
 
 ```python
 df = pd.read_csv('./data/T1FF-F2010-2014.csv', low_memory=False)
@@ -614,7 +614,6 @@ def plot_scheme(scheme, var, df, figsize=(16, 8), saveto=None):
     ax1.set_title('Value distribution')
 
     # Map
-    #p = df.plot(column=var, scheme=scheme, alpha=0.75, k=7, cmap=plt.cm.Blues_r, axes=ax2, linewidth=0.1)
     p = df.plot(column=var, scheme=scheme, alpha=0.75, k=7, cmap=cmap, axes=ax2, linewidth=0.1)
     ax2.axis('equal')
     ax2.set_axis_off()
@@ -676,122 +675,6 @@ plot_scheme('fisher_jenks', 'all_persons', map_data)
 
 
 ![png]({filename}images/tpl-prosperity_files/final_47_1.png)
-
-
-### Making interactive maps with bokeh
-
-- I've seen some good examples of using bokeh for interactive plotting and figured I could try my hand at making an explorable choropleth where the EDR is displayed when hovering over a specific neighbourhood. The following was largely followed from (http://darribas.org/gds_scipy16/ipynb_md/02_geovisualization.html)
-
-- Note: This example has classfied the neighbourhoods into 5 quantiles
-
-
-```python
-from collections import OrderedDict
-
-from bokeh.plotting import figure, show, output_notebook, output_file, ColumnDataSource
-from bokeh.models import HoverTool
-from bokeh.charts import Scatter, output_file, show
-from bokeh.io import output_notebook
-output_notebook()
-```
-
-
-
-    <div class="bk-root">
-        <a href="http://bokeh.pydata.org" target="_blank" class="bk-logo bk-logo-small bk-logo-notebook"></a>
-        <span id="a5eff3b3-26ea-4323-9f47-da8fb049e147">Loading BokehJS ...</span>
-    </div>
-
-
-
-
-
-```python
-def gpd_bokeh(df):
-    """Convert geometries from geopandas to bokeh format"""
-    nan = float('nan')
-    lons = []
-    lats = []
-    for i,shape in enumerate(df.geometry.values):
-        if shape.geom_type == 'MultiPolygon':
-            gx = []
-            gy = []
-            ng = len(shape.geoms) - 1
-            for j,member in enumerate(shape.geoms):
-                xy = np.array(list(member.exterior.coords))
-                xs = xy[:,0].tolist()
-                ys = xy[:,1].tolist()
-                gx.extend(xs)
-                gy.extend(ys)
-                if j < ng:
-                    gx.append(nan)
-                    gy.append(nan)
-            lons.append(gx)
-            lats.append(gy)
-
-        else:     
-            xy = np.array(list(shape.exterior.coords))
-            xs = xy[:,0].tolist()
-            ys = xy[:,1].tolist()
-            lons.append(xs)
-            lats.append(ys)
-
-    return lons,lats
-```
-
-
-```python
-lons, lats = gpd_bokeh(map_data)
-```
-
-
-```python
-values = map_data['all_persons']
-```
-
-
-```python
-bins_q5 = ps.Quantiles(values, k=5)
-bwr = plt.cm.get_cmap('Reds')
-bwr(.76)
-c5 = [bwr(c) for c in [0.2, 0.4, 0.6, 0.8, 1.0]]
-classes = bins_q5.yb
-colors = [c5[i] for i in classes]
-
-colors5 = ["#F1EEF6", "#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77"]
-colors5.reverse()
-colors = [colors5[i] for i in classes]
-```
-
-
-```python
-source = ColumnDataSource(data=dict(
-        x=lons,
-        y=lats,
-        color=colors,
-        name=map_data.neighbourhood,
-        rate=values
-    ))
-
-TOOLS = "pan, wheel_zoom, box_zoom, reset, hover, save"
-p = figure(title="Toronto EDR (quintiles)", tools=TOOLS,
-          plot_width=950, plot_height=500)
-
-p.patches('x', 'y', source=source,
-         fill_color='color', fill_alpha=0.7,
-         line_color='white', line_width=0.5)
-
-hover = p.select_one(HoverTool)
-hover.point_policy = 'follow_mouse'
-hover.tooltips = [
-    ("Neighbourhood", "@name"),
-    ("EDR", "@rate")
-]
-
-
-output_file("EDR_to.html", title="Toronto EDR example")
-show(p)
-```
 
 
 
